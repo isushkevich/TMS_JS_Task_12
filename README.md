@@ -1,2 +1,1 @@
-# isushkevich
-TMS_JS_Task_12
+# TMS_JS_Task_12

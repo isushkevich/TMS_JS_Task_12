@@ -1,5 +1,5 @@
 * {
-    font-family: "Segoe UI", sans-serif;
+    font-family: "Segoe UI", "Lucida Grande", sans-serif;
     font-size: 100%;
     color: black;
 }
@@ -8,12 +8,52 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-around;
-    /* padding-left: 30px;
-    padding-right: 30px; */
+    padding: 5px;
+}
+
+.left {
+    border: 1px solid #aaaaaa;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background-color: #65a7e0;
 }
 
 #button:disabled {
     color: #9e9e9e;
+}
+
+ul {
+    list-style-type: none;
+}
+
+#ul_tree {
+    padding: 10px;
+    margin: 0;
+}
+
+.caret {
+    cursor: pointer;
+    user-select: none;
+}
+
+.caret::before {
+    content: "\25B6";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.caret-down::before {
+    transform: rotate(90deg);
+}
+
+.nested {
+    display: none;
 }
 
 table, th, td {
@@ -41,37 +81,6 @@ td {
 
 tr:nth-child(even) {
     background-color: #f2f2f2;
-}
-
-ul, #myUL {
-    list-style-type: none;
-}
-
-/* Style ul and caret/arrow */
-
-#ul_tree {
-    margin: 0;
-    padding: 0;
-}
-
-.caret {
-    cursor: pointer;
-    user-select: none;
-}
-
-.caret::before {
-    content: "\25B6";
-    color: black;
-    display: inline-block;
-    margin-right: 6px;
-}
-
-.caret-down::before {
-    transform: rotate(90deg);
-}
-
-.nested {
-    display: none;
 }
 
 .orange {
