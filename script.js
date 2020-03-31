@@ -1,12 +1,12 @@
 "use strict;"
 
-let selectedLiItems = [];
-
 // кнопка
 let button = document.getElementById("button");
 button.addEventListener("click", clearTable);
 
 function clearTable() {
+    selectedItems.forEach(el => el.classList.remove("orange"));
+
     bodyEl.remove();
     bodyEl = document.createElement("tbody");
     tableEl.appendChild(bodyEl);
@@ -34,7 +34,7 @@ tableHeaders.forEach(item => {
 let bodyEl = document.createElement("tbody");
 tableEl.appendChild(bodyEl);
 
-// Шаг 2: создаём массив работников
+// создаём массив работников
 const employees = [
     {
         dept_unit_id: 0,
@@ -141,7 +141,6 @@ let qaTester = {
 };
 
 
-
 // создаём дерево работников
 let firstTree = [devDeptHead, devLead, developer, qaDeptHead, qaLead, qaTester];
 
@@ -176,45 +175,6 @@ let secondTree = [devDeptHead, qaDeptHead];
 // добавляем дерево на страницу
 let ulTree = document.getElementById("ul_tree");
 
-// const family = [
-//     { id: 0, name: 'GrandFather', parent_id: null },
-//     { id: 1, name: 'Father 1', parent_id: 0 },
-//     { id: 3, name: 'Father 2', parent_id: 0 },
-//     { id: 2, name: 'Son', parent_id: 1 },
-//     { id: 4, name: 'Daughter', parent_id: 1 },
-// ];
-
-// const itemsTree = getTree(family);
-
-// function getTree(items) {
-//     items.forEach(function (child) {
-//         // проверяем есть ли у элемента родительский
-//         if (child.parent_id !== null) {
-
-//             // если есть, то ищем его в массиве
-//             items.forEach(function (parent) {
-
-//                 // когда находим, то...
-//                 if (parent.id === child.parent_id) {
-
-//                     // ... проверяем есть ли у него уже массив детей
-//                     if (!parent.children) {
-//                         // если нет, то создаём
-//                         parent.children = [];
-//                     }
-
-//                     // ... и потом добавляем ребёнка в этот массив
-//                     parent.children.push(child);
-//                 }
-//             });
-//         }
-//     });
-
-//     // фильтруем массив так, чтобы у нас остались только корневые элементы
-//     return items.filter(item => item.parent_id === null);
-// }
-
-
 traverseTree(secondTree, ulTree);
 
 function traverseTree(elements, parentEl) {
@@ -230,8 +190,6 @@ function traverseTree(elements, parentEl) {
 
         liEl.setAttribute("data-id", el.id);
 
-
-        // если у элемента есть дети
         if (el.children) {
             // добавить каретку
             let str = "<span class=" + "caret" + "></span>";
@@ -243,13 +201,10 @@ function traverseTree(elements, parentEl) {
             let ulEl = document.createElement('ul');
 
             liEl.appendChild(ulEl);
-            ulEl.classList.add("nested");
             traverseTree(el.children, ulEl);
         }
     });
 }
-
-
 
 
 // заполнение таблицы
@@ -275,12 +230,17 @@ document.addEventListener("click", showItems);
 
 let temp;
 
+let selectedItems = [];
+
 function showItems() {
     temp = event.target;
     console.log(temp);
 
     if (event.target.tagName === "LI") {
         clearTable();
+        event.target.classList.toggle("orange");
+        selectedItems.push(event.target);
+
         if (!event.target.classList.contains("dept_class")) {
             let id = +event.target.dataset.id;
 
@@ -301,15 +261,3 @@ function showItems() {
         event.target.classList.toggle("caret-down");
     }
 }
-
-
-// управление каретками
-// let toggler = document.getElementsByClassName("caret");
-
-// for (let i = 0; i < toggler.length; i++) {
-//     toggler[i].addEventListener("click", function () {
-//         // this.parentElement.querySelector(".dept_class").classList.toggle("active");
-//         this.parentElement.childNodes[2].classList.toggle("nested");
-//         this.classList.toggle("caret-down");
-//     });
-// }
