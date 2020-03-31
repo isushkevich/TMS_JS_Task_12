@@ -1,0 +1,89 @@
+* {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 100%;
+}
+
+#container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    /* padding-left: 30px;
+    padding-right: 30px; */
+}
+
+#button:disabled {
+    color: #9e9e9e;
+}
+
+table, th, td {
+    border: 1px solid #aaaaaa;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
+}
+
+th {
+    background-color: #65a7e0;
+    color: #fff;
+    font-weight: normal;
+}
+
+td {
+    white-space: pre;
+    vertical-align: top;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+ul, #myUL {
+    list-style-type: none;
+}
+
+/* Remove margins and padding from the parent ul */
+
+#ul_tree {
+    margin: 0;
+    padding: 0;
+}
+
+/* Style the caret/arrow */
+
+.caret {
+    cursor: pointer;
+    user-select: none;
+    /* Prevent text selection */
+}
+
+/* Create the caret/arrow with a unicode, and style it */
+
+.caret::before {
+    content: "\25B6";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+
+.caret-down::before {
+    transform: rotate(90deg);
+}
+
+/* Hide the nested list */
+
+.nested {
+    display: none;
+}
+
+/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+
+.active {
+    display: block;
+}
