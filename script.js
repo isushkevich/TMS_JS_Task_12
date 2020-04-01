@@ -1,6 +1,10 @@
 "use strict;"
 
 
+// селектор
+const selector = document.getElementById('selector');
+
+
 // кнопка
 let button = document.getElementById("button");
 button.addEventListener("click", clearTable);
@@ -28,8 +32,10 @@ tableHeaders.forEach(item => {
 let bodyEl = document.createElement("tbody");
 tableEl.appendChild(bodyEl);
 
+
 // тут будут храниться "нажатые" элементы
 let selectedItems = [];
+
 
 // очистка таблицы
 function clearTable() {
@@ -266,7 +272,7 @@ async function fillTable(arr) {
         let person = {}; // деструктуризируем
         [person.id, person.name, person.telephone] = [arr[i]["id"], arr[i]["name"], arr[i]["tel"]];
 
-        person.salary = await getCalculation(arr[i]["salary"]);
+        person.salary = (arr[i]["salary"] * selector[selector.selectedIndex].dataset.currRate).toFixed(2);
 
         for (const key in person) {
             let tempTdEl = document.createElement("td");
@@ -281,39 +287,26 @@ async function fillTable(arr) {
 // конвертер
 let curreniesCodes = [319, 328, 346, 292];
 
-const selector = document.getElementById('selector');
-selector.addEventListener("change", getCalculation);
 
-let salaries = [];
 //добавляем опции на страницу
 async function addOptions() {
-    for (let i = 0; i < curreniesCodes.length; i++) {
+    let tempEl = document.createElement("option"); // BYN
+    selector.appendChild(tempEl);
+    tempEl.innerText = "BYN";
+    tempEl.setAttribute("data-curr-rate", 1);
+
+    for (let i = 0; i < curreniesCodes.length; i++) { // Остальные валюты
         const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + curreniesCodes[i])
         const data = await response.json();
 
-        let tempEl = document.createElement("option");
+        tempEl = document.createElement("option");
         selector.appendChild(tempEl);
         tempEl.innerText = data.Cur_Abbreviation;
-        tempEl.setAttribute("data-curr-id", curreniesCodes[i]);
 
-        salaries.push(data.Cur_Abbreviation)
+        let rate = (data.Cur_Scale / data.Cur_OfficialRate);
+
+        tempEl.setAttribute("data-curr-rate", rate);
     }
 }
 
 addOptions();
-
-
-// вычисляет значение по курсу
-async function getCalculation(amount) {
-    if (selector.selectedIndex) { // если выбрано не BYN
-        const selectedCur = selector.options[selector.selectedIndex].dataset.currId;
-        const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + selectedCur)
-        const data = await response.json();
-
-        let calculated = (amount * data.Cur_Scale / data.Cur_OfficialRate).toFixed(2);
-        return calculated;
-
-    } else {
-        return amount;
-    }
-}
