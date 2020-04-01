@@ -34,10 +34,12 @@ let selectedItems = [];
 // очистка таблицы
 function clearTable() {
     selectedItems.forEach(el => el.classList.remove("orange"));
+    selectedItems = [];
 
     bodyEl.remove();
     bodyEl = document.createElement("tbody");
     tableEl.appendChild(bodyEl);
+
     button.disabled = true;
 }
 
@@ -282,7 +284,7 @@ let curreniesCodes = [319, 328, 346, 292];
 const selector = document.getElementById('selector');
 selector.addEventListener("change", getCalculation);
 
-
+let salaries = [];
 //добавляем опции на страницу
 async function addOptions() {
     for (let i = 0; i < curreniesCodes.length; i++) {
@@ -293,6 +295,8 @@ async function addOptions() {
         selector.appendChild(tempEl);
         tempEl.innerText = data.Cur_Abbreviation;
         tempEl.setAttribute("data-curr-id", curreniesCodes[i]);
+
+        salaries.push(data.Cur_Abbreviation)
     }
 }
 
