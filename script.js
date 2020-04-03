@@ -212,7 +212,7 @@ function traverseTree(elements, parentEl) {
             liEl.setAttribute("data-id", el.id);
         } else {
             // добавляем каретку
-            let str = "<span class=" + "caret" + "></span>";
+            let str = "<span class=\"caret\"></span>";
             liEl.innerHTML = str;
             liEl.innerHTML += el.name;
 
@@ -230,8 +230,10 @@ function traverseTree(elements, parentEl) {
 traverseTree(rootTree, ulTree);
 
 
-//обработка кликов
+//обработка событий
 document.addEventListener("click", showItems);
+// selector.addEventListener("change", showItems);
+
 
 let temp;// для отладки
 
@@ -285,7 +287,13 @@ async function fillTable(arr) {
 
 
 // конвертер
-let curreniesCodes = [319, 328, 346, 292];
+
+const indianRupee = 319;
+const morrocanDihram = 328;
+const uruguayanPeso = 346;
+const euro = 292;
+
+let currenciesList = [indianRupee, morrocanDihram, uruguayanPeso, euro];
 
 
 //добавляем опции на страницу
@@ -295,8 +303,8 @@ async function addOptions() {
     tempEl.innerText = "BYN";
     tempEl.setAttribute("data-curr-rate", 1);
 
-    for (let i = 0; i < curreniesCodes.length; i++) { // Остальные валюты
-        const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + curreniesCodes[i])
+    for (let i = 0; i < currenciesList.length; i++) { // Остальные валюты
+        const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + currenciesList[i])
         const data = await response.json();
 
         tempEl = document.createElement("option");
