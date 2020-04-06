@@ -287,7 +287,6 @@ async function fillTable(arr) {
 
 
 // конвертер
-
 const indianRupee = 319;
 const morrocanDihram = 328;
 const uruguayanPeso = 346;
@@ -304,9 +303,10 @@ async function addOptions() {
     tempEl.setAttribute("data-curr-rate", 1);
 
     for (let i = 0; i < currenciesList.length; i++) { // Остальные валюты
-        const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + currenciesList[i])
-        const data = await response.json();
+        // const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + currenciesList[i])
+        // const data = await response.json();
 
+        const data = { Cur_Abbreviation: "usd", Cur_OfficialRate: 2, Cur_Scale: 1 }
         tempEl = document.createElement("option");
         selector.appendChild(tempEl);
         tempEl.innerText = data.Cur_Abbreviation;
@@ -318,3 +318,31 @@ async function addOptions() {
 }
 
 addOptions();
+
+
+async function getCurrencies(codes) {
+    return Promise.all(codes.map(async code => {
+        const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + code);
+        const data = await response.json();
+        return data;
+    }));
+}
+
+async function addOptions() {
+    let tempEl = document.createElement("option"); // BYN
+    selector.appendChild(tempEl);
+    tempEl.innerText = "BYN";
+    tempEl.setAttribute("data-curr-rate", 1);
+
+    let currencies = await getCurrencies(curreniesCodes);
+
+    for (let i = 0; i < currencies.length; i++) { // Остальные валюты
+        tempEl = document.createElement("option");
+        selector.appendChild(tempEl);
+        tempEl.innerText = currencies[i].Cur_Abbreviation;
+
+        let rate = (currencies[i].Cur_Scale / currencies[i].Cur_OfficialRate);
+
+        tempEl.setAttribute("data-curr-rate", rate);
+    }
+}
