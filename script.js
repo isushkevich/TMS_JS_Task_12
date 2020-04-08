@@ -293,40 +293,23 @@ const uruguayanPeso = 346;
 const euro = 292;
 
 let currenciesList = [indianRupee, morrocanDihram, uruguayanPeso, euro];
+let currenciesList2 = [{ name: "INR" }, { name: "EUR" }];
 
-
-//добавляем опции на страницу
-async function addOptions() {
-    let tempEl = document.createElement("option"); // BYN
-    selector.appendChild(tempEl);
-    tempEl.innerText = "BYN";
-    tempEl.setAttribute("data-curr-rate", 1);
-
-    for (let i = 0; i < currenciesList.length; i++) { // Остальные валюты
-        // const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + currenciesList[i])
-        // const data = await response.json();
-
-        const data = { Cur_Abbreviation: "usd", Cur_OfficialRate: 2, Cur_Scale: 1 }
-        tempEl = document.createElement("option");
-        selector.appendChild(tempEl);
-        tempEl.innerText = data.Cur_Abbreviation;
-
-        let rate = (data.Cur_Scale / data.Cur_OfficialRate);
-
-        tempEl.setAttribute("data-curr-rate", rate);
-    }
-}
-
-addOptions();
-
-
+// получаем валюту и добавляем опции на страницу
 async function getCurrencies(codes) {
     return Promise.all(codes.map(async code => {
         const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + code);
         const data = await response.json();
+
+        const abbr = data.Cur_Abbreviation;
+        const rate = (data.Cur_Scale / data.Cur_OfficialRate);
+
+        localStorage.setItem(code, rate);
+
         return data;
     }));
 }
+
 
 async function addOptions() {
     let tempEl = document.createElement("option"); // BYN
@@ -334,7 +317,7 @@ async function addOptions() {
     tempEl.innerText = "BYN";
     tempEl.setAttribute("data-curr-rate", 1);
 
-    let currencies = await getCurrencies(curreniesCodes);
+    let currencies = await getCurrencies(currenciesList);
 
     for (let i = 0; i < currencies.length; i++) { // Остальные валюты
         tempEl = document.createElement("option");
@@ -346,3 +329,9 @@ async function addOptions() {
         tempEl.setAttribute("data-curr-rate", rate);
     }
 }
+
+addOptions();
+
+let textEl = document.createElement("p");
+let left = document.getElementsByClassName("left")[0];
+left.appendChild(textEl);
