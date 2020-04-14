@@ -3,9 +3,9 @@
 
 // селектор
 const selector = document.getElementById('selector');
+selector.addEventListener("change", updateTable);
 
-
-// кнопка
+// кнопки
 let buttonClear = document.getElementById("button_clear");
 buttonClear.addEventListener("click", clearTable);
 
@@ -36,23 +36,6 @@ tableHeaders.forEach(item => {
 
 let bodyEl = document.createElement("tbody");
 tableEl.appendChild(bodyEl);
-
-
-// тут будут храниться "нажатые" элементы
-let selectedItems = [];
-
-
-// очистка таблицы
-function clearTable() {
-    selectedItems.forEach(el => el.classList.remove("orange"));
-    selectedItems = [];
-
-    bodyEl.remove();
-    bodyEl = document.createElement("tbody");
-    tableEl.appendChild(bodyEl);
-
-    buttonClear.disabled = true;
-}
 
 
 // создаём массив работников
@@ -126,6 +109,27 @@ const employees = [
         dept_unit_id: 5,
         tel: "123-123-3",
         salary: 1000
+    },
+    {
+        id: 10,
+        name: "Steve",
+        dept_unit_id: 20,
+        tel: "123-123-3",
+        salary: 1000
+    },
+    {
+        id: 11,
+        name: "Aisha",
+        dept_unit_id: 20,
+        tel: "123-123-3",
+        salary: 1200
+    },
+    {
+        id: 12,
+        name: "Oliver",
+        dept_unit_id: 20,
+        tel: "123-123-3",
+        salary: 1100
     }
 ];
 
@@ -133,36 +137,42 @@ const employees = [
 let devDeptHead = {
     name: 'Development Management',
     id: 0,
-    dept_units: 'Lead Developers',
+    parent_id: null,
 };
 let devLead = {
     name: 'Lead Developers',
     id: 1,
-    dept_units: "Developers"
+    parent_id: 0
 };
 let developer = {
     name: 'Developers',
     id: 2,
-    dept_units: null,
+    parent_id: 1,
 };
+let developer2 = {
+    name: 'Developers Too',
+    id: 20,
+    parent_id: 1,
+};
+
 let qaDeptHead = {
     name: 'Quality Assurance Management',
     id: 3,
-    dept_units: 'Lead QA',
+    parent_id: null,
 };
 let qaLead = {
     name: 'Lead QA',
     id: 4,
-    dept_units: "Testers",
+    parent_id: 3,
 };
 let qaTester = {
     name: 'Testers',
     id: 5,
-    dept_units: null,
+    parent_id: 4,
 };
 
 
-let firstTree = [devDeptHead, devLead, developer, qaDeptHead, qaLead, qaTester];
+let firstTree = [devDeptHead, devLead, developer, developer2, qaDeptHead, qaLead, qaTester];
 
 
 // добавляем сотрудников в отделы
@@ -180,10 +190,10 @@ firstTree.forEach(dept => {
 
 
 // добавляем отделы в родительские отделы
-firstTree.forEach(parent => {
-    if (parent.dept_units != null) {
-        firstTree.forEach(child => {
-            if (parent.dept_units === child.name) {
+firstTree.forEach(child => {
+    if (child.parent_id != null) {
+        firstTree.forEach(parent => {
+            if (parent.id === child.parent_id) {
                 if (!parent.children) {
                     parent.children = [];
                 }
@@ -197,8 +207,6 @@ firstTree.forEach(parent => {
 
 let rootTree = [devDeptHead, qaDeptHead];
 
-
-// переходим к добавлению дерева на страницу
 let ulTree = document.getElementById("ul_tree");
 
 
@@ -233,67 +241,6 @@ function traverseTree(elements, parentEl) {
 }
 
 traverseTree(rootTree, ulTree);
-
-
-//обработка событий
-ulTree.addEventListener("click", showTableItems);
-ulTree.addEventListener("click", toggleTreeElement);
-
-
-let temp;// для отладки
-
-
-//обработка событий
-function showTableItems() {
-    temp = event.target;
-    console.log(temp);
-
-    if (event.target.tagName === "LI") {
-        clearTable();
-        event.target.classList.toggle("orange");
-        selectedItems.push(event.target);
-
-        if (!event.target.classList.contains("dept_class")) {// если нажали на человека
-            let id = +event.target.dataset.id;
-            let person = employees.filter(item => item.id === id);
-            fillTable(person);
-
-        } else {// если нажали на отдел
-            let deptId = +event.target.dataset.deptId;
-            let persons = employees.filter(item => item.dept_unit_id === deptId);
-            fillTable(persons);
-        }
-    }
-}
-
-
-function toggleTreeElement() { // если нажали на каретку
-    if (event.target.tagName === "SPAN") {
-        event.target.parentElement.childNodes[2].classList.toggle("nested");
-        event.target.classList.toggle("caret-down");
-    }
-}
-
-
-// заполнение таблицы
-async function fillTable(arr) {
-    for (let i = 0; i < arr.length; i++) {
-        let tempTrEl = document.createElement("tr");
-        bodyEl.appendChild(tempTrEl);
-
-        let person = {}; // деструктуризируем
-        [person.id, person.name, person.telephone] = [arr[i]["id"], arr[i]["name"], arr[i]["tel"]];
-
-        person.salary = (arr[i]["salary"] * selector[selector.selectedIndex].dataset.currRate).toFixed(2);
-
-        for (const key in person) {
-            let tempTdEl = document.createElement("td");
-            tempTdEl.innerText = person[key];
-            tempTrEl.appendChild(tempTdEl);
-        }
-    }
-    buttonClear.disabled = false;
-}
 
 
 // валюты
@@ -331,9 +278,95 @@ async function getCurrencies(codes) {
 }
 
 
+// принудительное обновление курса по нажатию на кнопку
 async function updateRates() {
     localStorage.removeItem("updateTime");
     getCurrencies(currenciesList);
+}
+
+//обработка событий
+ulTree.addEventListener("click", showTableItems);
+ulTree.addEventListener("click", toggleTreeBranch);
+
+
+//обработка событий
+let selectedItems = []; // нажатые элементы дерева
+let selectedPeople; // выбранные сотрудники
+let temp; // для отладки
+
+function showTableItems() {
+    temp = event.target;
+    console.log(temp);
+
+    if (event.target.tagName === "LI") {
+        clearSelectedItems();
+        event.target.classList.toggle("orange");
+        selectedItems.push(event.target);
+
+        if (!event.target.classList.contains("dept_class")) {// если нажали на человека
+            let id = +event.target.dataset.id;
+            selectedPeople = employees.filter(employee => employee.id === id);
+            fillTable(selectedPeople);
+
+        } else {// если нажали на отдел
+            let deptId = +event.target.dataset.deptId;
+            selectedPeople = employees.filter(employee => employee.dept_unit_id === deptId);
+            fillTable(selectedPeople);
+        }
+    }
+}
+
+
+function toggleTreeBranch() { // если нажали на каретку
+    if (event.target.tagName === "SPAN") {
+        event.target.parentElement.childNodes[2].classList.toggle("nested");
+        event.target.classList.toggle("caret-down");
+    }
+}
+
+
+// заполнение таблицы
+async function fillTable(workers) {
+    clearTable();
+
+    for (let i = 0; i < workers.length; i++) {
+        let tempTrEl = document.createElement("tr");
+        bodyEl.appendChild(tempTrEl);
+
+        let person = {}; // деструктуризируем
+        [person.id, person.name, person.telephone] = [workers[i]["id"], workers[i]["name"], workers[i]["tel"]];
+
+        person.salary = (workers[i]["salary"] * selector[selector.selectedIndex].dataset.currRate).toFixed(2);
+
+        for (const key in person) {
+            let tempTdEl = document.createElement("td");
+            tempTdEl.innerText = person[key];
+            tempTrEl.appendChild(tempTdEl);
+        }
+    }
+    buttonClear.disabled = false;
+}
+
+
+// очистка таблицы
+function clearTable() {
+    bodyEl.remove();
+    bodyEl = document.createElement("tbody");
+    tableEl.appendChild(bodyEl);
+
+    buttonClear.disabled = true;
+}
+
+
+// обновление таблицы
+function updateTable() {
+    if (selectedPeople) { fillTable(selectedPeople); }
+}
+
+// очистка дерева от выделения
+function clearSelectedItems() {
+    selectedItems.forEach(el => el.classList.remove("orange"));
+    selectedItems = [];
 }
 
 
@@ -360,9 +393,10 @@ async function addOptions() {
 }
 
 
+// обновление текста снизу
 async function updateBottomText() {
     if (localStorage.getItem("updateTime") === null) {
-        textEl.innerText = "Updated: Never";
+        textEl.innerText = "Updated: never";
     }
     else {
         const updateTime = new Date(localStorage.getItem("updateTime"));
@@ -371,7 +405,9 @@ async function updateBottomText() {
 
         const minutes = Math.floor(difference / 1000 / 60);
 
-        if (minutes === 1) {
+        if (minutes === 0) {
+            textEl.innerText = "Updated " + updateTime.toLocaleString() + " (just now)"
+        } else if (minutes === 1) {
             textEl.innerText = "Updated " + updateTime.toLocaleString() + " (" + minutes + " minute ago)"
         } else {
             textEl.innerText = "Updated " + updateTime.toLocaleString() + " (" + minutes + " minutes ago)"
