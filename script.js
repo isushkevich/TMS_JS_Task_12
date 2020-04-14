@@ -282,6 +282,7 @@ async function getCurrencies(codes) {
 async function updateRates() {
     localStorage.removeItem("updateTime");
     getCurrencies(currenciesList);
+    updateTable();
 }
 
 //обработка событий
@@ -336,7 +337,9 @@ async function fillTable(workers) {
         let person = {}; // деструктуризируем
         [person.id, person.name, person.telephone] = [workers[i]["id"], workers[i]["name"], workers[i]["tel"]];
 
-        person.salary = (workers[i]["salary"] * selector[selector.selectedIndex].dataset.currRate).toFixed(2);
+        let rate = getRateFromStorage();
+
+        person.salary = (workers[i]["salary"] * rate).toFixed(2);
 
         for (const key in person) {
             let tempTdEl = document.createElement("td");
@@ -347,6 +350,23 @@ async function fillTable(workers) {
     buttonClear.disabled = false;
 }
 
+
+// получение курса из хранилища
+function getRateFromStorage() {
+    let rate = 1;
+
+    if (selector.value !== "BYN") {
+        let curStorage = JSON.parse(localStorage.getItem("curStorage"));
+
+        curStorage.forEach(curr => {
+            if (curr.name === selector.value) {
+                rate = curr.rate;
+            }
+        });
+    }
+
+    return rate;
+}
 
 // очистка таблицы
 function clearTable() {
@@ -403,7 +423,7 @@ async function updateBottomText() {
 
         const difference = new Date() - updateTime;
 
-        const minutes = Math.floor(difference / 1000 / 60);
+        const minutes = Math.round(difference / 1000 / 60);
 
         if (minutes === 0) {
             textEl.innerText = "Updated " + updateTime.toLocaleString() + " (just now)"
@@ -415,7 +435,6 @@ async function updateBottomText() {
     }
 }
 
-
 updateBottomText();
 addOptions();
-setInterval(updateBottomText, 60 * 1000);
+setInterval(updateBottomText, 30 * 1000);
