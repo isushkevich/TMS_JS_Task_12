@@ -6,9 +6,14 @@ const selector = document.getElementById('selector');
 
 
 // кнопка
-let button = document.getElementById("button");
-button.addEventListener("click", clearTable);
+let buttonClear = document.getElementById("button_clear");
+buttonClear.addEventListener("click", clearTable);
 
+let buttonUpdate = document.getElementById("button_update");
+buttonUpdate.addEventListener("click", updateRates);
+
+// текст с информацией о времени
+let textEl = document.getElementsByClassName("middle_text")[0];
 
 // создаём таблицу
 let tableEl = document.createElement("table");
@@ -46,7 +51,7 @@ function clearTable() {
     bodyEl = document.createElement("tbody");
     tableEl.appendChild(bodyEl);
 
-    button.disabled = true;
+    buttonClear.disabled = true;
 }
 
 
@@ -231,14 +236,15 @@ traverseTree(rootTree, ulTree);
 
 
 //обработка событий
-document.addEventListener("click", showItems);
-// selector.addEventListener("change", showItems);
+ulTree.addEventListener("click", showTableItems);
+ulTree.addEventListener("click", toggleTreeElement);
 
 
 let temp;// для отладки
 
 
-function showItems() {
+//обработка событий
+function showTableItems() {
     temp = event.target;
     console.log(temp);
 
@@ -257,8 +263,12 @@ function showItems() {
             let persons = employees.filter(item => item.dept_unit_id === deptId);
             fillTable(persons);
         }
+    }
+}
 
-    } else if (event.target.tagName === "SPAN") { // если нажали на каретку
+
+function toggleTreeElement() { // если нажали на каретку
+    if (event.target.tagName === "SPAN") {
         event.target.parentElement.childNodes[2].classList.toggle("nested");
         event.target.classList.toggle("caret-down");
     }
@@ -282,56 +292,94 @@ async function fillTable(arr) {
             tempTrEl.appendChild(tempTdEl);
         }
     }
-    button.disabled = false;
+    buttonClear.disabled = false;
 }
 
 
-// конвертер
+// валюты
 const indianRupee = 319;
 const morrocanDihram = 328;
 const uruguayanPeso = 346;
 const euro = 292;
 
 let currenciesList = [indianRupee, morrocanDihram, uruguayanPeso, euro];
-let currenciesList2 = [{ name: "INR" }, { name: "EUR" }];
 
-// получаем валюту и добавляем опции на страницу
+
+// получаем валюту
 async function getCurrencies(codes) {
-    return Promise.all(codes.map(async code => {
-        const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + code);
-        const data = await response.json();
+    let canUpdate = false;
 
-        const abbr = data.Cur_Abbreviation;
-        const rate = (data.Cur_Scale / data.Cur_OfficialRate);
+    const updateTime = new Date(localStorage.getItem("updateTime"));
 
-        localStorage.setItem(code, rate);
+    canUpdate = new Date() - updateTime >= 30 * 60 * 1000;
 
-        return data;
-    }));
+    if (canUpdate) {
+        const curStorage = async () => {
+            return Promise.all(codes.map(async code => {
+                const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + code);
+                const data = await response.json();
+
+                return { name: data.Cur_Abbreviation, rate: data.Cur_Scale / data.Cur_OfficialRate };
+            }));
+        }
+
+        localStorage.setItem("curStorage", JSON.stringify(await curStorage()));
+        localStorage.setItem("updateTime", new Date());
+
+        updateBottomText();
+    }
 }
 
 
+async function updateRates() {
+    localStorage.removeItem("updateTime");
+    getCurrencies(currenciesList);
+}
+
+
+// добавляем опции на страницу
 async function addOptions() {
     let tempEl = document.createElement("option"); // BYN
     selector.appendChild(tempEl);
     tempEl.innerText = "BYN";
     tempEl.setAttribute("data-curr-rate", 1);
 
-    let currencies = await getCurrencies(currenciesList);
+    await getCurrencies(currenciesList);
+
+    let currencies = JSON.parse(localStorage.getItem("curStorage"));
 
     for (let i = 0; i < currencies.length; i++) { // Остальные валюты
         tempEl = document.createElement("option");
         selector.appendChild(tempEl);
-        tempEl.innerText = currencies[i].Cur_Abbreviation;
+        tempEl.innerText = currencies[i].name;
 
-        let rate = (currencies[i].Cur_Scale / currencies[i].Cur_OfficialRate);
+        let rate = currencies[i].rate;
 
         tempEl.setAttribute("data-curr-rate", rate);
     }
 }
 
-addOptions();
 
-let textEl = document.createElement("p");
-let left = document.getElementsByClassName("left")[0];
-left.appendChild(textEl);
+async function updateBottomText() {
+    if (localStorage.getItem("updateTime") === null) {
+        textEl.innerText = "Updated: Never";
+    }
+    else {
+        const updateTime = new Date(localStorage.getItem("updateTime"));
+
+        const difference = new Date() - updateTime;
+
+        const minutes = Math.floor(difference / 1000 / 60);
+
+        if (minutes === 1) {
+            textEl.innerText = "Updated " + updateTime.toLocaleString() + " (" + minutes + " minute ago)"
+        } else {
+            textEl.innerText = "Updated " + updateTime.toLocaleString() + " (" + minutes + " minutes ago)"
+        }
+    }
+}
+
+
+updateBottomText();
+addOptions();
+setInterval(updateBottomText, 60 * 1000);

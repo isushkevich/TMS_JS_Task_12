@@ -19,20 +19,38 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px;
+    padding: 13px;
     background-color: #65a7e0;
 }
 
-#button {
+#selector {
     background-color: #65a7e0;
     color: #fff;
     border: 1px solid #fff;
     border-radius: 5px;
     cursor: pointer;
+    outline: none;
 }
 
-#button:disabled {
-    color: #bebebe;
+#selector option {
+    color: #fff;
+}
+
+#button_clear, #button_update {
+    background-color: #65a7e0;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+}
+
+#button_update {
+    margin: 0 12px;
+}
+
+#button_clear:disabled, #button_update:disabled {
+    color: #aaaaaa;
     border: 1px solid #aaaaaa;
     cursor: default;
 }
@@ -56,7 +74,7 @@ ul {
     content: "\25B6";
     color: black;
     display: inline-block;
-    margin-right: 6px;
+    margin-right: 5px;
 }
 
 .caret-down::before {
@@ -96,4 +114,10 @@ tr:nth-child(even) {
 
 .orange {
     color: orange;
+}
+
+.middle_text {
+    font-style: italic;
+    color: #aaaaaa;
+    text-align: center;
 }
