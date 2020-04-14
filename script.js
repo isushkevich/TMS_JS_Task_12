@@ -437,4 +437,4 @@ async function updateBottomText() {
 
 updateBottomText();
 addOptions();
-setInterval(updateBottomText, 30 * 1000);
+setInterval(updateBottomText, 60 * 1000);
