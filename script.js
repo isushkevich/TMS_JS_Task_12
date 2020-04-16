@@ -12,7 +12,7 @@ buttonClear.addEventListener("click", clearTable);
 let buttonUpdate = document.getElementById("button_update");
 buttonUpdate.addEventListener("click", updateRates);
 
-// текст с информацией о времени
+// текст с информацией о времени последнего обновления
 let textEl = document.getElementsByClassName("middle_text")[0];
 
 // создаём таблицу
@@ -243,54 +243,12 @@ function traverseTree(elements, parentEl) {
 traverseTree(rootTree, ulTree);
 
 
-// валюты
-const indianRupee = 319;
-const morrocanDihram = 328;
-const uruguayanPeso = 346;
-const euro = 292;
-
-let currenciesList = [indianRupee, morrocanDihram, uruguayanPeso, euro];
-
-
-// получаем валюту
-async function getCurrencies(codes) {
-    let canUpdate = false;
-
-    const updateTime = new Date(localStorage.getItem("updateTime"));
-
-    canUpdate = new Date() - updateTime >= 30 * 60 * 1000;
-
-    if (canUpdate) {
-        const curStorage = async () => {
-            return Promise.all(codes.map(async code => {
-                const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + code);
-                const data = await response.json();
-
-                return { name: data.Cur_Abbreviation, rate: data.Cur_Scale / data.Cur_OfficialRate };
-            }));
-        }
-
-        localStorage.setItem("curStorage", JSON.stringify(await curStorage()));
-        localStorage.setItem("updateTime", new Date());
-
-        updateBottomText();
-    }
-}
-
-
-// принудительное обновление курса по нажатию на кнопку
-async function updateRates() {
-    localStorage.removeItem("updateTime");
-    getCurrencies(currenciesList);
-    updateTable();
-}
-
-//обработка событий
+// обработка событий
 ulTree.addEventListener("click", showTableItems);
 ulTree.addEventListener("click", toggleTreeBranch);
 
 
-//обработка событий
+// обработка событий
 let selectedItems = []; // нажатые элементы дерева
 let selectedPeople; // выбранные сотрудники
 let temp; // для отладки
@@ -323,6 +281,49 @@ function toggleTreeBranch() { // если нажали на каретку
         event.target.parentElement.childNodes[2].classList.toggle("nested");
         event.target.classList.toggle("caret-down");
     }
+}
+
+
+// валюты
+const indianRupeeCode = 319;
+const morrocanDihramCode = 328;
+const uruguayanPesoCode = 346;
+const euroCode = 292;
+
+let currenciesList = [indianRupeeCode, morrocanDihramCode, uruguayanPesoCode, euroCode];
+
+
+// получаем валюту
+async function getCurrencies(codes) {
+    let canUpdate = false;
+
+    const updateTime = new Date(localStorage.getItem("updateTime"));
+
+    canUpdate = new Date() - updateTime >= 30 * 60 * 1000; // если прошло больше 30 мин
+
+    if (canUpdate) {
+        const curStorage = async () => {
+            return Promise.all(codes.map(async code => {
+                const response = await fetch("http://www.nbrb.by/api/exrates/rates/" + code);
+                const data = await response.json();
+
+                return { name: data.Cur_Abbreviation, rate: data.Cur_Scale / data.Cur_OfficialRate };
+            }));
+        }
+
+        localStorage.setItem("curStorage", JSON.stringify(await curStorage()));
+        localStorage.setItem("updateTime", new Date());
+
+        updateBottomText();
+    }
+}
+
+
+// принудительное обновление курса по нажатию на кнопку
+async function updateRates() {
+    localStorage.removeItem("updateTime");
+    await getCurrencies(currenciesList);
+    updateTable();
 }
 
 
@@ -368,6 +369,7 @@ function getRateFromStorage() {
     return rate;
 }
 
+
 // очистка таблицы
 function clearTable() {
     bodyEl.remove();
@@ -382,6 +384,7 @@ function clearTable() {
 function updateTable() {
     if (selectedPeople) { fillTable(selectedPeople); }
 }
+
 
 // очистка дерева от выделения
 function clearSelectedItems() {
@@ -434,6 +437,7 @@ async function updateBottomText() {
         }
     }
 }
+
 
 updateBottomText();
 addOptions();
