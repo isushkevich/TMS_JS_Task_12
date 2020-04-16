@@ -262,14 +262,14 @@ function showTableItems() {
         event.target.classList.toggle("orange");
         selectedItems.push(event.target);
 
-        if (!event.target.classList.contains("dept_class")) {// если нажали на человека
-            let id = +event.target.dataset.id;
-            selectedPeople = employees.filter(employee => employee.id === id);
-            fillTable(selectedPeople);
-
-        } else {// если нажали на отдел
+        if (event.target.classList.contains("dept_class")) {// если нажали на отдел
             let deptId = +event.target.dataset.deptId;
             selectedPeople = employees.filter(employee => employee.dept_unit_id === deptId);
+            fillTable(selectedPeople);
+
+        } else {// если нажали на человека
+            let id = +event.target.dataset.id;
+            selectedPeople = employees.filter(employee => employee.id === id);
             fillTable(selectedPeople);
         }
     }
@@ -382,7 +382,9 @@ function clearTable() {
 
 // обновление таблицы
 function updateTable() {
-    if (selectedPeople) { fillTable(selectedPeople); }
+    if (selectedPeople) {
+        fillTable(selectedPeople);
+    }
 }
 
 
