@@ -7,7 +7,7 @@ selector.addEventListener("change", updateTable);
 
 // кнопки
 let buttonClear = document.getElementById("button_clear");
-buttonClear.addEventListener("click", clearTable);
+buttonClear.addEventListener("click", clearTableAndTree);
 
 let buttonUpdate = document.getElementById("button_update");
 buttonUpdate.addEventListener("click", updateRates);
@@ -390,6 +390,14 @@ function updateTable() {
 function clearSelectedItems() {
     selectedItems.forEach(el => el.classList.remove("orange"));
     selectedItems = [];
+}
+
+
+//очистка всего
+function clearTableAndTree() {
+    clearTable();
+    clearSelectedItems();
+    selectedPeople = undefined;
 }
 
 
