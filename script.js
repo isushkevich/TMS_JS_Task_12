@@ -56,7 +56,7 @@ const employees = [
     },
     {
         id: 2,
-        name: "Michele",
+        name: "Michelle",
         dept_unit_id: 1,
         tel: "123-123-3",
         salary: 2200
@@ -407,7 +407,6 @@ async function addOptions() {
     let tempEl = document.createElement("option"); // BYN
     selector.appendChild(tempEl);
     tempEl.innerText = "BYN";
-    tempEl.setAttribute("data-curr-rate", 1);
 
     await getCurrencies(currenciesList);
 
@@ -417,10 +416,6 @@ async function addOptions() {
         tempEl = document.createElement("option");
         selector.appendChild(tempEl);
         tempEl.innerText = currencies[i].name;
-
-        let rate = currencies[i].rate;
-
-        tempEl.setAttribute("data-curr-rate", rate);
     }
 }
 
